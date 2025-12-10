@@ -106,9 +106,13 @@
             left: 50%;
             transform: translateX(-50%);
             width: 100%;
+            max-width: calc(100% - 40px);
+            padding: 0 20px;
+            box-sizing: border-box;
             font-size: 1.5rem;
             pointer-events: none;
             z-index: 12;
+            text-align: center;
         }
 
         #the-ball {
@@ -192,9 +196,12 @@
         @media (max-width: 768px) {
 
             .disclaimer-text,
-            .container p,
-            #ball-text {
+            .container p {
                 text-align: justify;
+            }
+
+            #ball-text {
+                text-align: center;
             }
 
             .container {
