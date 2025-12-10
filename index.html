@@ -102,9 +102,9 @@
 
         #ball-text {
             position: absolute;
-            top: 50%;
+            top: calc(50% + 80px);
             left: 50%;
-            transform: translate(-50%, -50%);
+            transform: translateX(-50%);
             width: 100%;
             font-size: 1.5rem;
             pointer-events: none;
@@ -113,11 +113,32 @@
 
         #the-ball {
             position: absolute;
-            width: 50px;
-            height: 50px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
             background-color: white;
             border-radius: 50%;
             z-index: 11;
+            animation: ballPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes ballPulse {
+            0% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: translate(-50%, -50%) scale(1.15);
+                opacity: 0.7;
+            }
+
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
         }
 
         /* --- FOOTER --- */
@@ -146,7 +167,25 @@
             height: 100%;
             width: 100%;
             background: linear-gradient(90deg, #fff, #aaa, #fff);
-            transition: width 0.3s ease-out;
+            transition: width 1.5s cubic-bezier(0.25, 0.1, 0.25, 1);
+        }
+
+        .start-over-btn {
+            margin-top: 40px;
+            opacity: 0;
+            animation: fadeIn 1s ease-out 0.5s forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* --- MOBILE STYLES --- */
@@ -187,8 +226,8 @@
     <!-- SCREEN 2: INDUCTION (Bouncing Ball) -->
     <div id="screen-induction" class="hidden">
         <div id="ball-container">
-            <div id="ball-text" class="flicker-active">Follow the ball with your eyes.</div>
-            <div id="the-ball" class="flicker-active"></div>
+            <div id="ball-text">Stare at the ball. Watch it pulse.</div>
+            <div id="the-ball"></div>
         </div>
     </div>
 
@@ -226,11 +265,13 @@
     <!-- SCREEN 7: RESULT -->
     <div id="screen-result" class="container hidden">
         <h1 id="final-text">Granted</h1>
+        <button class="start-over-btn" onclick="startOver()">Start Over</button>
     </div>
 
     <!-- SCREEN 8: EXIT -->
     <div id="screen-exit" class="container hidden">
         <h1>Better luck next time</h1>
+        <button class="start-over-btn" onclick="startOver()">Start Over</button>
     </div>
 
     <footer>
@@ -317,32 +358,14 @@
         }
 
         // --- INDUCTION LOGIC ---
-        let ballX = 50, ballY = 50, velX = 5, velY = 4;
-        let animFrame;
+        // Ball is now static and centered via CSS
 
         function startInduction() {
             sInduction.classList.remove('hidden');
-            animateBall();
             setTimeout(() => {
                 sInduction.classList.add('hidden');
                 sButton.classList.remove('hidden');
-                cancelAnimationFrame(animFrame);
             }, transitionTime);
-        }
-
-        function animateBall() {
-            const ball = document.getElementById('the-ball');
-            function update() {
-                const maxX = window.innerWidth - 50;
-                const maxY = window.innerHeight - 50;
-                ballX += velX; ballY += velY;
-                if (ballX <= 0 || ballX >= maxX) velX *= -1;
-                if (ballY <= 0 || ballY >= maxY) velY *= -1;
-                ball.style.left = ballX + 'px';
-                ball.style.top = ballY + 'px';
-                animFrame = requestAnimationFrame(update);
-            }
-            update();
         }
 
         function triggerMotivation() {
@@ -377,28 +400,33 @@
             }
         }
 
-        // --- HYPNOTIC PROGRESS BAR ---
+        // --- BLISSFUL ANTICIPATION PROGRESS BAR ---
         function startProgressBar() {
             sProgress.classList.remove('hidden');
             let progress = 100;
             progressBar.style.width = '100%';
 
-            // Intermittent decrements for hypnotic effect
+            // Smooth, gentle decrements for blissful anticipation
+            // Longer pauses, smaller steps, creating a sense of calm expectation
             const decrements = [
-                { delay: 800, amount: 8 },
-                { delay: 1500, amount: 5 },
-                { delay: 600, amount: 12 },
-                { delay: 2000, amount: 3 },
-                { delay: 900, amount: 7 },
-                { delay: 1800, amount: 4 },
-                { delay: 500, amount: 15 },
                 { delay: 1200, amount: 6 },
-                { delay: 2200, amount: 2 },
-                { delay: 700, amount: 10 },
-                { delay: 1600, amount: 5 },
-                { delay: 1000, amount: 8 },
-                { delay: 1400, amount: 6 },
-                { delay: 800, amount: 9 }
+                { delay: 1800, amount: 4 },
+                { delay: 2200, amount: 5 },
+                { delay: 1500, amount: 3 },
+                { delay: 2000, amount: 7 },
+                { delay: 2500, amount: 4 },
+                { delay: 1800, amount: 6 },
+                { delay: 2200, amount: 5 },
+                { delay: 2800, amount: 3 },
+                { delay: 2000, amount: 8 },
+                { delay: 2400, amount: 6 },
+                { delay: 1600, amount: 4 },
+                { delay: 2600, amount: 7 },
+                { delay: 2200, amount: 5 },
+                { delay: 3000, amount: 4 },
+                { delay: 2400, amount: 6 },
+                { delay: 2800, amount: 5 },
+                { delay: 2000, amount: 8 }
             ];
 
             let totalDelay = 0;
@@ -411,15 +439,15 @@
                 }, totalDelay);
             });
 
-            // Final completion
+            // Final gentle completion
             setTimeout(() => {
                 progressBar.style.width = '0%';
                 setTimeout(() => {
                     sProgress.classList.add('hidden');
                     sResult.classList.remove('hidden');
                     finalText.innerText = "Granted";
-                }, 500);
-            }, totalDelay + 500);
+                }, 800);
+            }, totalDelay + 1000);
         }
 
         // --- RESULT HANDLER ---
@@ -428,6 +456,29 @@
             if (choice === 'deny') {
                 sExit.classList.remove('hidden');
             }
+        }
+
+        // --- START OVER ---
+        function startOver() {
+            // Hide all screens
+            sDisclaimer.classList.add('hidden');
+            sInduction.classList.add('hidden');
+            sButton.classList.add('hidden');
+            sConfirmation.classList.add('hidden');
+            sQuestions.classList.add('hidden');
+            sProgress.classList.add('hidden');
+            sResult.classList.add('hidden');
+            sExit.classList.add('hidden');
+
+            // Reset state
+            currentStep = 0;
+            currentQuestion = 0;
+            document.body.classList.remove('flicker-active');
+            progressBar.style.width = '100%';
+
+            // Show disclaimer screen
+            sDisclaimer.classList.remove('hidden');
+            updateDisclaimerView();
         }
     </script>
 </body>
