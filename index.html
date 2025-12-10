@@ -129,6 +129,43 @@
             margin-top: auto;
             z-index: 100;
         }
+
+        /* --- PROGRESS BAR --- */
+        .progress-container {
+            width: 80%;
+            max-width: 400px;
+            height: 30px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 2px solid white;
+            margin-top: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, #fff, #aaa, #fff);
+            transition: width 0.3s ease-out;
+        }
+
+        /* --- MOBILE STYLES --- */
+        @media (max-width: 768px) {
+
+            .disclaimer-text,
+            .container p,
+            #ball-text {
+                text-align: justify;
+            }
+
+            .container {
+                padding: 30px;
+            }
+
+            h1 {
+                text-align: center;
+            }
+        }
     </style>
 </head>
 
@@ -160,21 +197,38 @@
         <button onclick="triggerMotivation()">Press this button for endless motivation</button>
     </div>
 
-    <!-- SCREEN 4: CONFIRMATION -->
+    <!-- SCREEN 4: ACCEPT/DENY -->
     <div id="screen-confirmation" class="container hidden">
-        <h1>You now have endless motivation</h1>
+        <h1>Do you accept endless motivation?</h1>
         <div style="margin-top: 30px;">
-            <button onclick="finish('accept')">Accept</button>
+            <button onclick="startAcceptanceFlow()">Accept</button>
             <button onclick="finish('deny')">Deny</button>
         </div>
     </div>
 
-    <!-- SCREEN 5: RESULT (From Server) -->
-    <div id="screen-result" class="container hidden">
-        <h1 id="final-text">Contacting Server...</h1>
+    <!-- SCREEN 5: QUESTIONS -->
+    <div id="screen-questions" class="container hidden">
+        <h1 id="question-text"></h1>
+        <div style="margin-top: 30px;">
+            <button onclick="answerQuestion('agree')">Agree</button>
+            <button onclick="answerQuestion('disagree')">Disagree</button>
+        </div>
     </div>
 
-    <!-- SCREEN 6: EXIT -->
+    <!-- SCREEN 6: PROGRESS BAR -->
+    <div id="screen-progress" class="container hidden">
+        <h1>Please wait</h1>
+        <div class="progress-container">
+            <div id="progress-bar" class="progress-bar flicker-active"></div>
+        </div>
+    </div>
+
+    <!-- SCREEN 7: RESULT -->
+    <div id="screen-result" class="container hidden">
+        <h1 id="final-text">Granted</h1>
+    </div>
+
+    <!-- SCREEN 8: EXIT -->
     <div id="screen-exit" class="container hidden">
         <h1>Better luck next time</h1>
     </div>
@@ -199,15 +253,26 @@
         let currentStep = 0;
         const transitionTime = 20000; // 20 seconds for induction
 
+        // --- ACCEPTANCE QUESTIONS ---
+        const acceptanceQuestions = [
+            "Do you promise to use this motivation to your advantage?",
+            "Are you ready to proceed?"
+        ];
+        let currentQuestion = 0;
+
         // --- DOM ELEMENTS ---
         const sDisclaimer = document.getElementById('screen-disclaimer');
         const sInduction = document.getElementById('screen-induction');
         const sButton = document.getElementById('screen-button');
         const sConfirmation = document.getElementById('screen-confirmation');
+        const sQuestions = document.getElementById('screen-questions');
+        const sProgress = document.getElementById('screen-progress');
         const sResult = document.getElementById('screen-result');
         const sExit = document.getElementById('screen-exit');
         const finalText = document.getElementById('final-text');
         const discText = document.getElementById('disc-text');
+        const questionText = document.getElementById('question-text');
+        const progressBar = document.getElementById('progress-bar');
         const btnNext = document.getElementById('btn-next');
         const btnYesNo = document.getElementById('btn-yesno');
 
@@ -285,11 +350,84 @@
             sConfirmation.classList.remove('hidden');
         }
 
+        // --- ACCEPTANCE FLOW ---
+        function startAcceptanceFlow() {
+            currentQuestion = 0;
+            sConfirmation.classList.add('hidden');
+            sQuestions.classList.remove('hidden');
+            questionText.innerText = acceptanceQuestions[currentQuestion];
+        }
+
+        function answerQuestion(answer) {
+            if (answer === 'disagree') {
+                // User disagreed - exit
+                sQuestions.classList.add('hidden');
+                sExit.classList.remove('hidden');
+                return;
+            }
+
+            currentQuestion++;
+            if (currentQuestion < acceptanceQuestions.length) {
+                // Show next question
+                questionText.innerText = acceptanceQuestions[currentQuestion];
+            } else {
+                // All questions answered - show progress bar
+                sQuestions.classList.add('hidden');
+                startProgressBar();
+            }
+        }
+
+        // --- HYPNOTIC PROGRESS BAR ---
+        function startProgressBar() {
+            sProgress.classList.remove('hidden');
+            let progress = 100;
+            progressBar.style.width = '100%';
+
+            // Intermittent decrements for hypnotic effect
+            const decrements = [
+                { delay: 800, amount: 8 },
+                { delay: 1500, amount: 5 },
+                { delay: 600, amount: 12 },
+                { delay: 2000, amount: 3 },
+                { delay: 900, amount: 7 },
+                { delay: 1800, amount: 4 },
+                { delay: 500, amount: 15 },
+                { delay: 1200, amount: 6 },
+                { delay: 2200, amount: 2 },
+                { delay: 700, amount: 10 },
+                { delay: 1600, amount: 5 },
+                { delay: 1000, amount: 8 },
+                { delay: 1400, amount: 6 },
+                { delay: 800, amount: 9 }
+            ];
+
+            let totalDelay = 0;
+            decrements.forEach((step = { delay, amount }) => {
+                totalDelay += step.delay;
+                setTimeout(() => {
+                    progress -= step.amount;
+                    if (progress < 0) progress = 0;
+                    progressBar.style.width = progress + '%';
+                }, totalDelay);
+            });
+
+            // Final completion
+            setTimeout(() => {
+                progressBar.style.width = '0%';
+                setTimeout(() => {
+                    sProgress.classList.add('hidden');
+                    sResult.classList.remove('hidden');
+                    finalText.innerText = "Granted";
+                }, 500);
+            }, totalDelay + 500);
+        }
+
         // --- RESULT HANDLER ---
         function finish(choice) {
             sConfirmation.classList.add('hidden');
-            sResult.classList.remove('hidden');
-            finalText.innerText = (choice === 'accept') ? "Granted" : "Come back next time";
+            if (choice === 'deny') {
+                sExit.classList.remove('hidden');
+            }
         }
     </script>
 </body>
